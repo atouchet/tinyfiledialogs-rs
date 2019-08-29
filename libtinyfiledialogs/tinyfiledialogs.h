@@ -1,21 +1,19 @@
 /*_________
- /         \ tinyfiledialogs.h v3.3.4 [Mar 15, 2018] zlib licence
- |tiny file| Unique header file created [November 9, 2014]
- | dialogs | Copyright (c) 2014 - 2018 Guillaume Vareille http://ysengrin.com
- \____  ___/ http://tinyfiledialogs.sourceforge.net
-      \|     git clone http://git.code.sf.net/p/tinyfiledialogs/code tinyfd
-		 ____________________________________________
-		|                                            |
-		|   email: tinyfiledialogs at ysengrin.com   |
-		|____________________________________________|
-         ________________________________________________________________________
-        |                                                                        |
-        | the windows only wchar_t UTF-16 prototypes are at the end of this file |
-        |________________________________________________________________________|
+/         \ tinyfiledialogs.h v3.3.9 [Apr 14, 2019] zlib licence
+|tiny file| Unique header file created [November 9, 2014]
+| dialogs | Copyright (c) 2014 - 2018 Guillaume Vareille http://ysengrin.com
+\____  ___/ http://tinyfiledialogs.sourceforge.net
+\|     git clone http://git.code.sf.net/p/tinyfiledialogs/code tinyfd
+____________________________________________
+|                                            |
+|   email: tinyfiledialogs at ysengrin.com   |
+|____________________________________________|
+________________________________________________________________________
+|                                                                        |
+| the windows only wchar_t UTF-16 prototypes are at the end of this file |
+|________________________________________________________________________|
 
-Please 1) upvote my stackoverflow answer/advert https://stackoverflow.com/a/47651444
-       2) leave a one word review on Sourceforge.
-       3) let me know If you are using it on exotic hardware/OS/compiler
+Please upvote my stackoverflow answer https://stackoverflow.com/a/47651444
 
 tiny file dialogs (cross-platform C C++)
 InputBox PasswordBox MessageBox ColorPicker
@@ -23,9 +21,9 @@ OpenFileDialog SaveFileDialog SelectFolderDialog
 Native dialog library for WINDOWS MAC OSX GTK+ QT CONSOLE & more
 SSH supported via automatic switch to console mode or X11 forwarding
 
-a C file and a header (add them to your C or C++ project) with 8 functions:
+one C file + a header (add them to your C or C++ project) with 8 functions:
 - beep
-- notify popup
+- notify popup (tray)
 - message & question
 - input & password
 - save file
@@ -35,7 +33,7 @@ a C file and a header (add them to your C or C++ project) with 8 functions:
 
 Complements OpenGL Vulkan GLFW GLUT GLUI VTK SFML TGUI
 SDL Ogre Unity3d ION OpenCV CEGUI MathGL GLM CPW GLOW
-IMGUI MyGUI GLT NGL STB & GUI less programs
+Open3D IMGUI MyGUI GLT NGL STB & GUI less programs
 
 NO INIT
 NO MAIN LOOP
@@ -58,9 +56,9 @@ Unix (command line calls) ASCII UTF-8
 The same executable can run across desktops & distributions
 
 C89 & C++98 compliant: tested with C & C++ compilers
-VisualStudio MinGW-gcc GCC Clang TinyCC OpenWatcom-v2 BorlandC SunCC Zapcc
+VisualStudio MinGW-gcc GCC Clang TinyCC OpenWatcom-v2 BorlandC SunCC ZapCC
 on Windows Mac Linux Bsd Solaris Minix Raspbian
-using Gnome Kde Enlightenment Mate Cinnamon Unity Lxde Lxqt Xfce
+using Gnome Kde Enlightenment Mate Cinnamon Budgie Unity Lxde Lxqt Xfce
 WindowMaker IceWm Cde Jds OpenBox Awesome Jwm Xdm
 
 Bindings for LUA and C# dll, Haskell
@@ -103,171 +101,173 @@ and the corresponding closing bracket near the end of this file:
 extern "C" {
 #endif
 
-extern char const tinyfd_version[8]; /* contains tinyfd current version number */
-extern char const tinyfd_needs[]; /* info about requirements */
-extern int tinyfd_verbose; /* 0 (default) or 1 : on unix, prints the command line calls */
+	extern char const tinyfd_version[8]; /* contains tinyfd current version number */
+	extern char const tinyfd_needs[]; /* info about requirements */
+	extern int tinyfd_verbose; /* 0 (default) or 1 : on unix, prints the command line calls */
+	extern int tinyfd_silent; /* 1 (default) or 0 : on unix,
+							  hide errors and warnings from called dialog*/
 
 #ifdef _WIN32
-/* for UTF-16 use the functions at the end of this files */
-extern int tinyfd_winUtf8; /* 0 (default MBCS) or 1 (UTF-8)*/
-/* on windows string char can be 0:MBCS or 1:UTF-8
-unless your code is really prepared for UTF-8 on windows, leave this on MBSC.
-Or you can use the UTF-16 (wchar) prototypes at the end of ths file.*/
+							  /* for UTF-16 use the functions at the end of this files */
+	extern int tinyfd_winUtf8; /* 0 (default MBCS) or 1 (UTF-8)*/
+							   /* on windows string char can be 0:MBCS or 1:UTF-8
+							   unless your code is really prepared for UTF-8 on windows, leave this on MBSC.
+							   Or you can use the UTF-16 (wchar) prototypes at the end of ths file.*/
 #endif
 
-extern int tinyfd_forceConsole;  /* 0 (default) or 1 */
-/* for unix & windows: 0 (graphic mode) or 1 (console mode).
-0: try to use a graphic solution, if it fails then it uses console mode.
-1: forces all dialogs into console mode even when an X server is present,
-  if the package dialog (and a console is present) or dialog.exe is installed.
-  on windows it only make sense for console applications */
+	extern int tinyfd_forceConsole;  /* 0 (default) or 1 */
+									 /* for unix & windows: 0 (graphic mode) or 1 (console mode).
+									 0: try to use a graphic solution, if it fails then it uses console mode.
+									 1: forces all dialogs into console mode even when an X server is present,
+									 if the package dialog (and a console is present) or dialog.exe is installed.
+									 on windows it only make sense for console applications */
 
-extern char tinyfd_response[1024];
-/* if you pass "tinyfd_query" as aTitle,
-the functions will not display the dialogs
-but will return 0 for console mode, 1 for graphic mode.
-tinyfd_response is then filled with the retain solution.
-possible values for tinyfd_response are (all lowercase)
-for graphic mode:
-  windows_wchar windows
-  applescript kdialog zenity zenity3 matedialog qarma
-  python2-tkinter python3-tkinter python-dbus perl-dbus
-  gxmessage gmessage xmessage xdialog gdialog
-for console mode:
-  dialog whiptail basicinput no_solution */
+	extern char tinyfd_response[1024];
+	/* if you pass "tinyfd_query" as aTitle,
+	the functions will not display the dialogs
+	but will return 0 for console mode, 1 for graphic mode.
+	tinyfd_response is then filled with the retain solution.
+	possible values for tinyfd_response are (all lowercase)
+	for graphic mode:
+	windows_wchar windows
+	applescript kdialog zenity zenity3 matedialog qarma
+	python2-tkinter python3-tkinter python-dbus perl-dbus
+	gxmessage gmessage xmessage xdialog gdialog
+	for console mode:
+	dialog whiptail basicinput no_solution */
 
-void tinyfd_beep();
+	void tinyfd_beep();
 
-int tinyfd_notifyPopup(
-	char const * const aTitle, /* NULL or "" */
-	char const * const aMessage, /* NULL or "" may contain \n \t */
-	char const * const aIconType); /* "info" "warning" "error" */
-		/* return has only meaning for tinyfd_query */
+	int tinyfd_notifyPopup(
+		char const * const aTitle, /* NULL or "" */
+		char const * const aMessage, /* NULL or "" may contain \n \t */
+		char const * const aIconType); /* "info" "warning" "error" */
+									   /* return has only meaning for tinyfd_query */
 
-int tinyfd_messageBox(
-	char const * const aTitle , /* NULL or "" */
-	char const * const aMessage , /* NULL or "" may contain \n \t */
-	char const * const aDialogType , /* "ok" "okcancel" "yesno" "yesnocancel" */
-	char const * const aIconType , /* "info" "warning" "error" "question" */
-	int const aDefaultButton ) ;
-		/* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
+	int tinyfd_messageBox(
+		char const * const aTitle, /* NULL or "" */
+		char const * const aMessage, /* NULL or "" may contain \n \t */
+		char const * const aDialogType, /* "ok" "okcancel" "yesno" "yesnocancel" */
+		char const * const aIconType, /* "info" "warning" "error" "question" */
+		int const aDefaultButton);
+	/* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
 
-char const * tinyfd_inputBox(
-	char const * const aTitle , /* NULL or "" */
-	char const * const aMessage , /* NULL or "" may NOT contain \n \t on windows */
-	char const * const aDefaultInput ) ;  /* "" , if NULL it's a passwordBox */
-		/* returns NULL on cancel */
+	char const * tinyfd_inputBox(
+		char const * const aTitle, /* NULL or "" */
+		char const * const aMessage, /* NULL or "" may NOT contain \n \t on windows */
+		char const * const aDefaultInput);  /* "" , if NULL it's a passwordBox */
+											/* returns NULL on cancel */
 
-char const * tinyfd_saveFileDialog(
-	char const * const aTitle , /* NULL or "" */
-	char const * const aDefaultPathAndFile , /* NULL or "" */
-	int const aNumOfFilterPatterns , /* 0 */
-	char const * const * const aFilterPatterns , /* NULL | {"*.jpg","*.png"} */
-	char const * const aSingleFilterDescription ) ; /* NULL | "text files" */
-		/* returns NULL on cancel */
+	char const * tinyfd_saveFileDialog(
+		char const * const aTitle, /* NULL or "" */
+		char const * const aDefaultPathAndFile, /* NULL or "" */
+		int const aNumOfFilterPatterns, /* 0 */
+		char const * const * const aFilterPatterns, /* NULL | {"*.jpg","*.png"} */
+		char const * const aSingleFilterDescription); /* NULL | "text files" */
+													  /* returns NULL on cancel */
 
-char const * tinyfd_openFileDialog(
-	char const * const aTitle , /* NULL or "" */
-	char const * const aDefaultPathAndFile , /* NULL or "" */
-	int const aNumOfFilterPatterns , /* 0 */
-	char const * const * const aFilterPatterns , /* NULL {"*.jpg","*.png"} */
-	char const * const aSingleFilterDescription , /* NULL | "image files" */
-	int const aAllowMultipleSelects ) ; /* 0 or 1 */
-		/* in case of multiple files, the separator is | */
-		/* returns NULL on cancel */
+	char const * tinyfd_openFileDialog(
+		char const * const aTitle, /* NULL or "" */
+		char const * const aDefaultPathAndFile, /* NULL or "" */
+		int const aNumOfFilterPatterns, /* 0 */
+		char const * const * const aFilterPatterns, /* NULL | {"*.jpg","*.png"} */
+		char const * const aSingleFilterDescription, /* NULL | "image files" */
+		int const aAllowMultipleSelects); /* 0 or 1 */
+										  /* in case of multiple files, the separator is | */
+										  /* returns NULL on cancel */
 
-char const * tinyfd_selectFolderDialog(
-	char const * const aTitle , /* NULL or "" */
-	char const * const aDefaultPath ) ; /* NULL or "" */
-		/* returns NULL on cancel */
+	char const * tinyfd_selectFolderDialog(
+		char const * const aTitle, /* NULL or "" */
+		char const * const aDefaultPath); /* NULL or "" */
+										  /* returns NULL on cancel */
 
-char const * tinyfd_colorChooser(
-	char const * const aTitle , /* NULL or "" */
-	char const * const aDefaultHexRGB , /* NULL or "#FF0000" */
-	unsigned char const aDefaultRGB[3] , /* { 0 , 255 , 255 } */
-	unsigned char aoResultRGB[3] ) ; /* { 0 , 0 , 0 } */
-		/* returns the hexcolor as a string "#FF0000" */
-		/* aoResultRGB also contains the result */
-		/* aDefaultRGB is used only if aDefaultHexRGB is NULL */
-		/* aDefaultRGB and aoResultRGB can be the same array */
-		/* returns NULL on cancel */
+	char const * tinyfd_colorChooser(
+		char const * const aTitle, /* NULL or "" */
+		char const * const aDefaultHexRGB, /* NULL or "#FF0000" */
+		unsigned char const aDefaultRGB[3], /* { 0 , 255 , 255 } */
+		unsigned char aoResultRGB[3]); /* { 0 , 0 , 0 } */
+									   /* returns the hexcolor as a string "#FF0000" */
+									   /* aoResultRGB also contains the result */
+									   /* aDefaultRGB is used only if aDefaultHexRGB is NULL */
+									   /* aDefaultRGB and aoResultRGB can be the same array */
+									   /* returns NULL on cancel */
 
 
-/************ NOT CROSS PLATFORM SECTION STARTS HERE ************************/
+									   /************ NOT CROSS PLATFORM SECTION STARTS HERE ************************/
 #ifdef _WIN32
 #ifndef TINYFD_NOLIB
 
-/* windows only - utf-16 version */
-int tinyfd_notifyPopupW(
-	wchar_t const * const aTitle, /* NULL or L"" */
-	wchar_t const * const aMessage, /* NULL or L"" may contain \n \t */
-	wchar_t const * const aIconType); /* L"info" L"warning" L"error" */
+									   /* windows only - utf-16 version */
+	int tinyfd_notifyPopupW(
+		wchar_t const * const aTitle, /* NULL or L"" */
+		wchar_t const * const aMessage, /* NULL or L"" may contain \n \t */
+		wchar_t const * const aIconType); /* L"info" L"warning" L"error" */
 
-/* windows only - utf-16 version */
-int tinyfd_messageBoxW(
-	wchar_t const * const aTitle , /* NULL or L"" */
-	wchar_t const * const aMessage, /* NULL or L"" may contain \n \t */
-	wchar_t const * const aDialogType, /* L"ok" L"okcancel" L"yesno" */
-	wchar_t const * const aIconType, /* L"info" L"warning" L"error" L"question" */
-	int const aDefaultButton ); /* 0 for cancel/no , 1 for ok/yes */
-		/* returns 0 for cancel/no , 1 for ok/yes */
+										  /* windows only - utf-16 version */
+	int tinyfd_messageBoxW(
+		wchar_t const * const aTitle, /* NULL or L"" */
+		wchar_t const * const aMessage, /* NULL or L"" may contain \n \t */
+		wchar_t const * const aDialogType, /* L"ok" L"okcancel" L"yesno" */
+		wchar_t const * const aIconType, /* L"info" L"warning" L"error" L"question" */
+		int const aDefaultButton); /* 0 for cancel/no , 1 for ok/yes */
+								   /* returns 0 for cancel/no , 1 for ok/yes */
 
-/* windows only - utf-16 version */
-wchar_t const * tinyfd_inputBoxW(
-	wchar_t const * const aTitle, /* NULL or L"" */
-	wchar_t const * const aMessage, /* NULL or L"" may NOT contain \n nor \t */
-	wchar_t const * const aDefaultInput ); /* L"" , if NULL it's a passwordBox */
-	
-/* windows only - utf-16 version */
-wchar_t const * tinyfd_saveFileDialogW(
-	wchar_t const * const aTitle, /* NULL or L"" */
-	wchar_t const * const aDefaultPathAndFile, /* NULL or L"" */
-	int const aNumOfFilterPatterns, /* 0 */
-	wchar_t const * const * const aFilterPatterns, /* NULL or {L"*.jpg",L"*.png"} */
-	wchar_t const * const aSingleFilterDescription); /* NULL or L"image files" */
-		/* returns NULL on cancel */
+								   /* windows only - utf-16 version */
+	wchar_t const * tinyfd_inputBoxW(
+		wchar_t const * const aTitle, /* NULL or L"" */
+		wchar_t const * const aMessage, /* NULL or L"" may NOT contain \n nor \t */
+		wchar_t const * const aDefaultInput); /* L"" , if NULL it's a passwordBox */
 
-/* windows only - utf-16 version */
-wchar_t const * tinyfd_openFileDialogW(
-	wchar_t const * const aTitle, /* NULL or L"" */
-	wchar_t const * const aDefaultPathAndFile, /* NULL or L"" */
-	int const aNumOfFilterPatterns , /* 0 */
-	wchar_t const * const * const aFilterPatterns, /* NULL {L"*.jpg",L"*.png"} */
-	wchar_t const * const aSingleFilterDescription, /* NULL or L"image files" */
-	int const aAllowMultipleSelects ) ; /* 0 or 1 */
-		/* in case of multiple files, the separator is | */
-		/* returns NULL on cancel */
+											  /* windows only - utf-16 version */
+	wchar_t const * tinyfd_saveFileDialogW(
+		wchar_t const * const aTitle, /* NULL or L"" */
+		wchar_t const * const aDefaultPathAndFile, /* NULL or L"" */
+		int const aNumOfFilterPatterns, /* 0 */
+		wchar_t const * const * const aFilterPatterns, /* NULL or {L"*.jpg",L"*.png"} */
+		wchar_t const * const aSingleFilterDescription); /* NULL or L"image files" */
+														 /* returns NULL on cancel */
 
-/* windows only - utf-16 version */
-wchar_t const * tinyfd_selectFolderDialogW(
-	wchar_t const * const aTitle, /* NULL or L"" */
-	wchar_t const * const aDefaultPath); /* NULL or L"" */
-		/* returns NULL on cancel */
+														 /* windows only - utf-16 version */
+	wchar_t const * tinyfd_openFileDialogW(
+		wchar_t const * const aTitle, /* NULL or L"" */
+		wchar_t const * const aDefaultPathAndFile, /* NULL or L"" */
+		int const aNumOfFilterPatterns, /* 0 */
+		wchar_t const * const * const aFilterPatterns, /* NULL {L"*.jpg",L"*.png"} */
+		wchar_t const * const aSingleFilterDescription, /* NULL or L"image files" */
+		int const aAllowMultipleSelects); /* 0 or 1 */
+										  /* in case of multiple files, the separator is | */
+										  /* returns NULL on cancel */
 
-/* windows only - utf-16 version */
-wchar_t const * tinyfd_colorChooserW(
-	wchar_t const * const aTitle, /* NULL or L"" */
-	wchar_t const * const aDefaultHexRGB, /* NULL or L"#FF0000" */
-	unsigned char const aDefaultRGB[3] , /* { 0 , 255 , 255 } */
-	unsigned char aoResultRGB[3] ) ; /* { 0 , 0 , 0 } */
-		/* returns the hexcolor as a string L"#FF0000" */
-		/* aoResultRGB also contains the result */
-		/* aDefaultRGB is used only if aDefaultHexRGB is NULL */
-		/* aDefaultRGB and aoResultRGB can be the same array */
-		/* returns NULL on cancel */
+										  /* windows only - utf-16 version */
+	wchar_t const * tinyfd_selectFolderDialogW(
+		wchar_t const * const aTitle, /* NULL or L"" */
+		wchar_t const * const aDefaultPath); /* NULL or L"" */
+											 /* returns NULL on cancel */
+
+											 /* windows only - utf-16 version */
+	wchar_t const * tinyfd_colorChooserW(
+		wchar_t const * const aTitle, /* NULL or L"" */
+		wchar_t const * const aDefaultHexRGB, /* NULL or L"#FF0000" */
+		unsigned char const aDefaultRGB[3], /* { 0 , 255 , 255 } */
+		unsigned char aoResultRGB[3]); /* { 0 , 0 , 0 } */
+									   /* returns the hexcolor as a string L"#FF0000" */
+									   /* aoResultRGB also contains the result */
+									   /* aDefaultRGB is used only if aDefaultHexRGB is NULL */
+									   /* aDefaultRGB and aoResultRGB can be the same array */
+									   /* returns NULL on cancel */
 
 
 #endif /*TINYFD_NOLIB*/
 #else /*_WIN32*/
 
-/* unix zenity only */
-char const * tinyfd_arrayDialog(
-	char const * const aTitle , /* NULL or "" */
-	int const aNumOfColumns , /* 2 */
-	char const * const * const aColumns, /* {"Column 1","Column 2"} */
-	int const aNumOfRows, /* 2 */
-	char const * const * const aCells);
-		/* {"Row1 Col1","Row1 Col2","Row2 Col1","Row2 Col2"} */
+									   /* unix zenity only */
+	char const * tinyfd_arrayDialog(
+		char const * const aTitle, /* NULL or "" */
+		int const aNumOfColumns, /* 2 */
+		char const * const * const aColumns, /* {"Column 1","Column 2"} */
+		int const aNumOfRows, /* 2 */
+		char const * const * const aCells);
+	/* {"Row1 Col1","Row1 Col2","Row2 Col1","Row2 Col2"} */
 
 #endif /*_WIN32 */
 
@@ -287,38 +287,38 @@ char const * tinyfd_arrayDialog(
 - Avoid using " and ' in titles and messages.
 - There's one file filter only, it may contain several patterns.
 - If no filter description is provided,
-  the list of patterns will become the description.
+the list of patterns will become the description.
 - char const * filterPatterns[3] = { "*.obj" , "*.stl" , "*.dxf" } ;
 - On windows char defaults to MBCS, set tinyfd_winUtf8=1 to use UTF-8
 - On windows link against Comdlg32.lib and Ole32.lib
-  This linking is not compulsary for console mode (see above).
+This linking is not compulsary for console mode (see above).
 - On unix: it tries command line calls, so no such need.
 - On unix you need one of the following:
-  applescript, kdialog, zenity, matedialog, shellementary, qarma,
-  python (2 or 3)/tkinter/python-dbus (optional), Xdialog
-  or dialog (opens terminal if running without console) or xterm.
+applescript, kdialog, zenity, matedialog, shellementary, qarma,
+python (2 or 3)/tkinter/python-dbus (optional), Xdialog
+or dialog (opens terminal if running without console) or xterm.
 - One of those is already included on most (if not all) desktops.
 - In the absence of those it will use gdialog, gxmessage or whiptail
-  with a textinputbox.
+with a textinputbox.
 - If nothing is found, it switches to basic console input,
-  it opens a console if needed (requires xterm + bash).
+it opens a console if needed (requires xterm + bash).
 - Use windows separators on windows and unix separators on unix.
 - String memory is preallocated statically for all the returned values.
 - File and path names are tested before return, they are valid.
 - If you pass only a path instead of path + filename,
-  make sure it ends with a separator.
+make sure it ends with a separator.
 - tinyfd_forceConsole=1; at run time, forces dialogs into console mode.
 - On windows, console mode only make sense for console applications.
 - On windows, Console mode is not implemented for wchar_T UTF-16.
 - Mutiple selects are not allowed in console mode.
 - The package dialog must be installed to run in enhanced console mode.
-  It is already installed on most unix systems.
+It is already installed on most unix systems.
 - On osx, the package dialog can be installed via
-  http://macappstore.org/dialog or http://macports.org
+http://macappstore.org/dialog or http://macports.org
 - On windows, for enhanced console mode,
-  dialog.exe should be copied somewhere on your executable path.
-  It can be found at the bottom of the following page:
-  http://andrear.altervista.org/home/cdialog.php
+dialog.exe should be copied somewhere on your executable path.
+It can be found at the bottom of the following page:
+http://andrear.altervista.org/home/cdialog.php
 - If dialog is missing, it will switch to basic console input.
 - You can query the type of dialog that will be use.
 - MinGW needs gcc >= v4.9 otherwise some headers are incomplete.
